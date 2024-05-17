@@ -1,0 +1,68 @@
+import pandas as pd
+
+# Define the data
+data = {
+    'Item Code': [210212038, 210212051, 210212056, 210212104, 210212105, 211212047, 211212052, 211212058, 
+                  211212088, 211212089, 211212100, 211212101, 211212103, 211214152, 212212133, 210517061, 
+                  210517062, 211213001, 211213015],
+    'Item Description': ['Fluorinert Electronic Liquid 3M P/N 26/:FC-770', 'MEGAPOSIT SPR 955CM-0.9', 'OAP (HMDS)', 
+                         'BT-208, Additive for coolant', 'NMP (n- METHYL-2-Pyrrolidone)', 'KRF M35G 27cP GAL', 
+                         'EC SOLVENT(AZ) 5L COR', 'PFR IX420H 32cP GAL', 'SUMIRESIST PEK - 136A8LSG', 
+                         'SUMIRESIST PFI-93B4LSG', 'UV210GS-0.4', 'UV210GS-0.6', 'AZ 300 MIF DEVELOPER', 'DUV42S-6', 
+                         'UV1100-0.38', 'Cylinder for F2/kr Mix in Neon (Ne)', 'Cylinder for 1.2% Kripton(Kr) in Neon (Ne)', 
+                         '1.2% Kripton (Kr) in Neon (Ne)', 'Gas F2/Kripton in Neon'],
+    'Sub Category': ['CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 
+                     'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 
+                     'CHEMICALS', 'CYLINDER', 'CYLINDER', 'GASES', 'GASES'],
+    'Section': ['LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 
+                'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 
+                'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 'LITHOGRAPHY', 
+                'LITHOGRAPHY'],
+    'CostPerUnit': [3452.25, 59500, 9000, 1200, 2052, 93750, 1295, 32250, 121270, 56280, 126500, 126500, 487.5, 
+                    39375, 155070, 50000, 128250, 114.864, 50],
+    'LeadTime': [16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 24, 16, 16, 24, 24, 24, 24],
+    'OrderingTime': [24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24],
+    'Consumption': [242, 12, 16, 0, 80, 11, 4200, 20, 8, 12, 16, 7, 11600, 48, 2, 0, 1, 6300, 0],
+    'Cons / Wafer': [0.1008333333, 0.005, 0.006666666667, 0, 0.03333333333, 0.004583333333, 1.75, 0.008333333333, 
+                     0.003333333333, 0.005, 0.006666666667, 0.002916666667, 4.833333333, 0.02, 0.0008333333333, 0, 
+                     0.0004166666667, 2.625, 0],
+    'Required': [121, 6, 8, 0, 40, 5.5, 2100, 10, 4, 6, 8, 3.5, 5800, 24, 1, 0, 0.5, 3150, 0],
+    'Stock Store': [197, 7, 0, 0, 140, 6, 5294, 8, 0, 0, 1, 1, 1400, 48, 0, 0, 0, 0, 0],
+    'Shortage': [76, 1, -8, 0, 100, 0.5, 3194, -2, -4, -6, -7, -2.5, -4400, 24, -1, -0.5, -0.5, -3150, 0]
+}
+
+df = pd.DataFrame(data)
+
+def calculate_requirements(num_wafers, item_code):
+    row = df[df['Item Code'] == int(item_code)]
+    if len(row) == 0:
+        return "Item code not found."
+    
+    consumption = row['Consumption'].values[0]
+    cons_per_wafer = row['Cons / Wafer'].values[0]
+    stock_store = row['Stock Store'].values[0]
+    
+    gross_requirement_per_annum = cons_per_wafer * 12 * 1.05 * num_wafers
+    net_requirement_per_annum = gross_requirement_per_annum - stock_store
+    
+    return {
+        'Item Description': row['Item Description'].values[0],
+        'Consumption': round(consumption, 1),
+        'Cons / Wafer': round(cons_per_wafer, 10),
+        'Gross Requirement (95% Yield) per annum': round(gross_requirement_per_annum, 1),
+        'Stock Store': round(stock_store, 1),
+        'Net Requirement (95% Yield) per annum': round(net_requirement_per_annum, 1)
+    }
+
+num_wafers = int(input("Enter the number of wafers per month (LITHOGRAPHY): "))
+item_code = input("Enter the item code (LITHOGRAPHY): ")
+
+requirements = calculate_requirements(num_wafers, item_code)
+if isinstance(requirements, str):
+    print(requirements)
+else:
+    headers = ['Item Description', 'Consumption', 'Cons / Wafer', 
+               'Gross Requirement (95% Yield) per annum', 'Stock Store', 
+               'Net Requirement (95% Yield) per annum']
+    
+    print("\n".join([f"{header}: {requirements[header]}" for header in headers]))
