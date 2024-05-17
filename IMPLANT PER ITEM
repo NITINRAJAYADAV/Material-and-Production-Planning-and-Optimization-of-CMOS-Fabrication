@@ -1,0 +1,53 @@
+import pandas as pd
+
+# Define the data in a dictionary
+data = {
+    'Item Code': [210417017, 211213008, 211213032, 211213035, 211213037, 211213039, 211213040, 211211021, 211211022],
+    'Item Description': [
+        'Boron Gas Cylinder', 'Gas Arsine S.D.S.', 'Gas Phosphine, S.D.S2', 'Gas Xenon(Xe)', 
+        'Gas Germanium Tetrafluoride (GeF4)', 'Gas Sulphur Hexafluride (SF6)', 'Boron Trifluoride', 
+        'TEST WAFER P-TYPE', 'Test Wafer -TS18'
+    ],
+    'Sub Category': ['CYLINDER', 'GASES', 'GASES', 'GASES', 'GASES', 'GASES', 'GASES', 'Wafers', 'Wafers'],
+    'Consumption': [3, 100, 0, 190, 3, 200, 25, 3, 1],
+    'Cons / Wafer': [0.00125, 0.04166666667, 0, 0.07916666667, 0.00125, 0.08333333333, 0.01041666667, 0.00125, 0.0004166666667],
+    'Stock Store': [0, 440, 170, 100, 450, 100, 1, None, None]
+}
+
+# Create a DataFrame
+df = pd.DataFrame(data)
+
+def calculate_requirements(num_wafers, item_code):
+    row = df[df['Item Code'] == int(item_code)]
+    if len(row) == 0:
+        return "Item code not found."
+    
+    consumption = row['Consumption'].values[0]
+    cons_per_wafer = row['Cons / Wafer'].values[0]
+    stock_store = row['Stock Store'].values[0]
+    
+    gross_requirement_per_annum = cons_per_wafer * 12 * 1.05 * num_wafers
+    net_requirement_per_annum = gross_requirement_per_annum - stock_store if stock_store is not None else gross_requirement_per_annum
+    
+    return {
+        'Item Description': row['Item Description'].values[0],
+        'Consumption': consumption,
+        'Cons / Wafer': cons_per_wafer,
+        'Gross Requirement(95% Yield)_per_annum': gross_requirement_per_annum,
+        'Stock Store': stock_store if stock_store is not None else 0,
+        'Net Requirement(95% Yield)_per_annum': net_requirement_per_annum
+    }
+
+# Ask for the number of wafers per month and item code
+num_wafers = int(input("Enter the number of wafers per month (IMPLANT): "))
+item_code = input("Enter the item code (IMPLANT): ")
+
+# Calculate requirements
+requirements = calculate_requirements(num_wafers, item_code)
+
+# Print the results
+if isinstance(requirements, str):
+    print(requirements)
+else:
+    headers = ['Item Description', 'Consumption', 'Cons / Wafer', 'Gross Requirement(95% Yield)_per_annum', 'Stock Store', 'Net Requirement(95% Yield)_per_annum']
+    print("\n".join([f"{header}: {requirements[header]}" for header in headers]))
