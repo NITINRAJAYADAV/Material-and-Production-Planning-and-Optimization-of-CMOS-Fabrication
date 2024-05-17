@@ -1,0 +1,38 @@
+import pandas as pd
+
+# Define the MRP data for the WET ETCH section
+data = {
+    'Item Description': [
+        'BHF-63U', 'PHOSPHORIC ACID 85%', 'Hydrogen Peroxide GB 30%', 'ELM 30', 'Methanol',
+        'ACT N-396 stipper', 'CHOLINE ETCHANT', 'HYDROCHLORIC ACID (HCl), 20%',
+        'HYDROFLUORIC ACID (HF) 49 %', 'Mixed Nitric HF (HF + HNO3)', 'SULFURIC ACID (H2SO4), 96%'
+    ],
+    'Cons / Wafer': [
+        0.6783333333, 1.222916667, 8.766666667, 0.3333333333, 2.060833333,
+        1.345833333, 1.608333333, 1.144583333, 1.055, 0.3583333333, 8.419166667
+    ],
+    'Yield': ['95%'] * 11,
+    'Stock Store': [106, 2180, 3400, 6200, 1951, 4640, 1800, 2465, 536, 220, 2600]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+num_wafers = int(input("Enter the number of wafers per month (WET ETCH): "))
+
+# Calculate actual requirements with 5% yield assumption
+df['Actual Required_Per annum'] = (df['Cons / Wafer'] * 12) * 1.05 * num_wafers  # Assuming 5% yield
+
+# Calculate available stock
+df['Available Stock'] = df['Stock Store'] - df['Actual Required_Per annum']
+
+# Check for items with negative available stock
+negative_stock_items = df[df['Available Stock'] < 0]['Item Description'].tolist()
+
+# Total material requirement planning
+total_material_requirements = df['Actual Required_Per annum'].sum()
+
+# Print results
+print("Material Requirement Planning (MRP): ")
+df.index = df.index + 1
+print(df)
