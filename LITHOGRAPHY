@@ -1,0 +1,51 @@
+import pandas as pd
+
+# Define the MRP data for the LITHOGRAPHY section
+data = {
+    'Item Description': [
+        'Fluorinert Electronic Liquid 3M P/N 26/:FC-770',
+        'MEGAPOSIT SPR 955CM-0.9 , Material Code: 10104047 Package: 1 US gallon Glass Bottle',
+        'OAP (HMDS) Package: 2.5L Bottle',
+        'BT-208, Additive for coolant (25 kg container)',
+        'NMP (n- METHYL-2-Pyrrolidone)',
+        'KRF M35G 27cP GAL , Material code: 64049-400EG Package:1 US gallon Glass Bottle',
+        'EC SOLVENT(AZ) 5L COR, MATERIAL CODE : 11116201 Package: 5L Bottle',
+        'PFR IX420H 32cP GAL, MATERIAL CODE : 50838-400 Package: 1 US gallon Glass Bottle',
+        'SUMIRESIST PEK - 136A8LSG, MATERIAL CODE : KBAWY6313KYC004 Package: 1US Gallon Glass Bottle',
+        'SUMIRESIST PFI-93B4LSG, MATERIAL : KBAWX8687KYC004 Package: 1US Gallon Glass Bottle',
+        'UV210GS-0.4, Material code: 11131264 Package: 1 US gallon Glass Bottle',
+        'UV210GS-0.6 , Material code: 11131265 Package: 1 US gallon Glass Bottle',
+        'AZ 300 MIF DEVELOPER , Vendor Material Code: 10454125817 Package: BTL-0200 ( 200 L Drum with DIP Tube)',
+        'DUV42S-6 , Material Code: B94618-22 Package: 4L Aicello W/Glass Neck Threads',
+        'UV1100-0.38 Package: 1 US gallon Glass Bottle'
+    ],
+    'Section': ['LITHOGRAPHY'] * 15,
+    'Cons / Wafer': [
+        0.1008333333, 0.005, 0.006666666667, 0, 0.03333333333, 0.004583333333, 1.75, 0.008333333333,
+        0.003333333333, 0.005, 0.006666666667, 0.002916666667, 4.833333333, 0.02, 0.0008333333333
+    ],
+    'Yield': [95] * 15,
+    'Stock Store': [76, 4, 40.5, 0, 140, 1, 4195, 2, 1, 6, 2, 3, 3200, 24, 0]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+num_wafers = int(input("Enter the number of wafers per month (LITHOGRAPHY): "))
+
+# Calculate actual requirements with 5% yield assumption
+df['Actual Required_Per annum'] = (df['Cons / Wafer'] * 12) * 1.05 * num_wafers  # Assuming 5% yield
+
+# Calculate available stock
+df['Available Stock'] = df['Stock Store'] - df['Actual Required_Per annum']
+
+# Check for items with negative available stock
+negative_stock_items = df[df['Available Stock'] < 0]['Item Description'].tolist()
+
+# Total material requirement planning
+total_material_requirements = df['Actual Required_Per annum'].sum()
+
+# Print results
+print("Material Requirement Planning (MRP) with 5% Yield Assumption:")
+df.index = df.index + 1
+print(df)
