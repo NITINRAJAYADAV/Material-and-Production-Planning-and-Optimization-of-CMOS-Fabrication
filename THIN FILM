@@ -1,0 +1,38 @@
+import pandas as pd
+
+# Create a DataFrame with the given data
+data = {
+    'Item Description': [
+        'ETHYLENE GLYCOL',
+        'TDMAT (Tetrakis(dimethylamino)titanium) Ti[N(CH3)2]4',
+        'TEOS (Tetraethyl Orthosilicate)',
+        'TMPO(Trimethylphosphite)',
+        'TEB(Triethylborate)'
+    ],
+    'Section': ['THIN FILM'] * 5,
+    'Cons / Wafer': [0.35, 0.2083333333, 0.007916666667, 0.0004166666667, 0],
+    'Yield': [95] * 5,
+    'Stock Store': [0, 1500, 25.4, 1, 1]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+num_wafers = int(input("Enter the number of wafers per month (THIN FILM): "))
+
+# Calculate actual requirements with 5% yield assumption
+df['Actual Required_Per annum'] = (df['Cons / Wafer'] * 12) * 1.05 * num_wafers  # Assuming 5% yield
+
+# Calculate available stock
+df['Available Stock'] = df['Stock Store'] - df['Actual Required_Per annum']
+
+# Check for items with negative available stock
+negative_stock_items = df[df['Available Stock'] < 0]['Item Description'].tolist()
+
+# Total material requirement planning
+total_material_requirements = df['Actual Required_Per annum'].sum()
+
+# Print results
+print("Material Requirement Planning (MRP): ")
+df.index = df.index + 1
+print(df)
