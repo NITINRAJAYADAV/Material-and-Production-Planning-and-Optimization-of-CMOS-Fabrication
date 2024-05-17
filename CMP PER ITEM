@@ -1,0 +1,61 @@
+import pandas as pd
+
+# Define the data as a dictionary
+data = {
+    'Item Code': [210212121, 210212122, 211212045, 211212068, 211212075, 221212011, 200],
+    'Item Description': [
+        'Oxide CMP slurry with ceria Abrasive (HITACHI HS-8005-D4)',
+        'Additive for oxide CMP slurry (Hitachi -HS-7307GP)',
+        'ISO-PROPYL ALCOHOL',
+        'PL 4219 SLURRY, Package : 55 UG Drum',
+        'SEMI-SPERSE W 2000 SLURRY, package 200L kodama Drum',
+        'Ammonium Hydroxide 29%',
+        'P Type Test Wafer (TS18)'
+    ],
+    'Sub Category': ['CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'CHEMICALS', 'Wafers'],
+    'Section': ['CMP', 'CMP', 'CMP', 'CMP', 'CMP', 'CMP', 'CMP'],
+    'CostPerUnit': [4125, 3375, 515, 1125, 2775, 590, 2025],
+    'LeadTime': [24, 24, 24, 24, 24, 24, 16],
+    'OrderingTime': [24, 24, 24, 24, 24, 24, 24],
+    'Consumption': [100, 80, 518, 1484, 3800, 1420, 6100],
+    'Cons / Wafer': [0.04166666667, 0.03333333333, 0.2158333333, 0.6183333333, 1.583333333, 0.5916666667, 2.541666667],
+    'Stock Store': [0, 0, 18, 55, 800, 600, None] # None indicates missing data
+}
+
+# Create a DataFrame from the data
+df = pd.DataFrame(data)
+
+def calculate_requirements(num_wafers, item_code):
+    row = df[df['Item Code'] == int(item_code)]
+    if len(row) == 0:
+        return "Item code not found."
+    
+    consumption = row['Consumption'].values[0]
+    cons_per_wafer = row['Cons / Wafer'].values[0]
+    stock_store = row['Stock Store'].values[0]
+    
+    gross_requirement_per_annum = cons_per_wafer * 12 * 1.05 * num_wafers
+    net_requirement_per_annum = gross_requirement_per_annum - stock_store if stock_store is not None else gross_requirement_per_annum
+
+    return {
+        'Item Description': row['Item Description'].values[0],
+        'Consumption': consumption,
+        'Cons / Wafer': cons_per_wafer,
+        'Gross Requirement(95% Yield)_per_annum': gross_requirement_per_annum,
+        'Stock Store': stock_store if stock_store is not None else 0,
+        'Net Requirement(95% Yield)_per_annum': net_requirement_per_annum
+    }
+
+# Ask for the number of wafers per month and item code
+num_wafers = int(input("Enter the number of wafers per month (CMP): "))
+item_code = input("Enter the item code (CMP): ")
+
+# Calculate requirements
+requirements = calculate_requirements(num_wafers, item_code)
+
+# Print the results
+if isinstance(requirements, str):
+    print(requirements)
+else:
+    headers = ['Item Description', 'Consumption', 'Cons / Wafer', 'Gross Requirement(95% Yield)_per_annum', 'Stock Store', 'Net Requirement(95% Yield)_per_annum']
+    print("\n".join([f"{header}: {requirements[header]}" for header in headers]))
