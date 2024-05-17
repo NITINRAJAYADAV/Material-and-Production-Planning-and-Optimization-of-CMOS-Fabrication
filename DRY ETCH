@@ -1,0 +1,42 @@
+import pandas as pd
+
+# Define the MRP data for the DRY ETCH section
+data = {
+    'Item Description': [
+        'SOLVENT GALDEN HT 135(5 KG BOTTLE)', 'Cylinder of Difluoromethane',
+        'Chlorine gas Cylinder', 'Freon-14 Gas Cylinder', 'Hydrogen Bromide Gas Cylinder',
+        'Cylinder of BCL3', 'Gas cylinder for Sulphur Hexa flouride (SF6) 99.999%',
+        'Cylinder of CHF3 (Freon 23)', 'Gas Boron Trichloride', 'Gas Chlorine',
+        'Hydrogen Bromide', 'Gas Sulphur Hexafluride(SF6) 99.999%', 'Gas Freon - 14',
+        'Gas Freon 23 (CHF 3)', 'Gas Difluoromethane (CH2F2)'
+    ],
+    'Cons / Wafer': [
+        0.0125, 0.0004166666667, 0.0004166666667, 0.0004166666667, 0,
+        0.0004166666667, 0, 0.0004166666667, 0.02083333333, 0.00875,
+        0, 0.025, 0.0125, 0.01458333333, 0.005
+    ],
+    'Yield': [95] * 15,
+    'Stock Store': [90, 2, 1, 2, 1, 0, 0, 1, 49.7, 50, 1, 0, 60, 25, 1]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+num_wafers = int(input("Enter the number of wafers per month (Dry etch): "))
+
+# Calculate actual requirements with 5% yield assumption
+df['Actual Required_Per annum'] = (df['Cons / Wafer'] * 12) * 1.05 * num_wafers  # Assuming 5% yield
+
+# Calculate available stock
+df['Available Stock'] = df['Stock Store'] - df['Actual Required_Per annum']
+
+# Check for items with negative available stock
+negative_stock_items = df[df['Available Stock'] < 0]['Item Description'].tolist()
+
+# Total material requirement planning
+total_material_requirements = df['Actual Required_Per annum'].sum()
+
+# Print results
+print("Material Requirement Planning (MRP): ")
+df.index = df.index + 1
+print(df)
