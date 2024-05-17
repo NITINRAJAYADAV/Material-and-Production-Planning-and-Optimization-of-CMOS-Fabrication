@@ -1,0 +1,55 @@
+import pandas as pd
+
+data = {
+    "Item Code": [210417009, 210417019, 210517071, 211113004, 211212035, 211213006, 211213028, 211213041],
+    "Item Description": ["Cylinder of Amonia Gas", "Nitric Oxide Gas Cylinder", "Cylinder of SiH4 Gas", 
+                         "20% Silane(SiH4) in Helium", "Gas Dichlorosilane", "Gas Ammonia", 
+                         "Gas Hydrogen Chloride", "Nitric Oxide"],
+    "Sub Category": ["CYLINDER", "CYLINDER", "CYLINDER", "GASES", "GASES", "GASES", "GASES", "GASES"],
+    "Section": ["DIFFUSION", "DIFFUSION", "DIFFUSION", "DIFFUSION", "DIFFUSION", "DIFFUSION", 
+                "DIFFUSION", "DIFFUSION"],
+    "CostPerUnit": [45000, 85833, 58000, 265000, 660000, 2100, 21100, 38499],
+    "LeadTime": [24, 24, 16, 26, 24, 24, 24, 28],
+    "OrderingTime": [24, 24, 24, 24, 24, 24, 24, 24],
+    "Consumption": [1, 1, 2, 2, 20, 25, 31, 7.2],
+    "Cons / Wafer": [0.001666666667, 0.0004166666667, 0.0008333333333, 0.0008333333333, 
+                     0.008333333333, 0.01041666667, 0.01291666667, 0.003],
+    "Required": [2, 0.5, 1, 1, 10, 12.5, 15.5, 3.6],
+    "Stock Store": [7, 1, 3, 3000, 40, 175, 60, 5]
+}
+
+df = pd.DataFrame(data)
+
+def calculate_requirements(num_wafers, item_code):
+    row = df[df['Item Code'] == int(item_code)]
+    if len(row) == 0:
+        return "Item code not found."
+    
+    consumption = row['Consumption'].values[0]
+    cons_per_wafer = row['Cons / Wafer'].values[0]
+    stock_store = row['Stock Store'].values[0]
+    
+    gross_requirement_per_annum = cons_per_wafer * 12 * 1.05 * num_wafers
+    net_requirement_per_annum = gross_requirement_per_annum - stock_store
+    
+    return {
+        'Item Description': row['Item Description'].values[0],
+        'Consumption': round(consumption, 1),
+        'Cons / Wafer': round(cons_per_wafer, 10),
+        'Gross Requirement (95% Yield) per annum': round(gross_requirement_per_annum, 1),
+        'Stock Store': round(stock_store, 1),
+        'Net Requirement (95% Yield) per annum': round(net_requirement_per_annum, 1)
+    }
+
+num_wafers = int(input("Enter the number of wafers per month (DIFFUSION): "))
+item_code = input("Enter the item code (DIFFUSION): ")
+
+requirements = calculate_requirements(num_wafers, item_code)
+if isinstance(requirements, str):
+    print(requirements)
+else:
+    headers = ['Item Description', 'Consumption', 'Cons / Wafer', 
+               'Gross Requirement (95% Yield) per annum', 'Stock Store', 
+               'Net Requirement (95% Yield) per annum']
+    
+    print("\n".join([f"{header}: {requirements[header]}" for header in headers]))
