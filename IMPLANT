@@ -1,0 +1,37 @@
+import pandas as pd
+
+# Define the MRP data for the IMPLANT section
+data = {
+    'Item Description': ['Boron Gas Cylinder', 'Gas Arsine S.D.S. (II)',
+                         'Gas Phosphine, S.D.S2', 'Gas Xenon(Xe)',
+                         'Gas Germanium Tetrafluoride (GeF4) 99.999%',
+                         'Gas Sulphur Hexafluride (SF6) 99.99%', 'Boron Trifluoride',
+                         'TEST WAFER P-TYPE (TS18, W3030C01)', 'Test Wafer -TS18, W2056C01 (Siltronics)'],
+    'Cons / Wafer': [0.00125, 0.04166666667, 0, 0.07916666667,
+                     0.00125, 0.08333333333, 0.01041666667,
+                     0.00125, 0.0004166666667],
+    'Yield': [95] * 9,
+    'Stock Store': [0, 440, 170, 100, 450, 100, 1, None, None]  # Assuming None for missing data
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+num_wafers = int(input("Enter the number of wafers per month (IMPLANT): "))
+
+# Calculate actual requirements with 5% yield assumption
+df['Actual Required_Per annum'] = (df['Cons / Wafer'] * 12) * 1.05 * num_wafers  # Assuming 5% yield
+
+# Calculate available stock
+df['Available Stock'] = df['Stock Store'] - df['Actual Required_Per annum']
+
+# Check for items with negative available stock
+negative_stock_items = df[df['Available Stock'] < 0]['Item Description'].tolist()
+
+# Total material requirement planning
+total_material_requirements = df['Actual Required_Per annum'].sum()
+
+# Print results
+print("Material Requirement Planning (MRP): ")
+df.index = df.index + 1
+print(df)
